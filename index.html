@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>シージ・ツール配布</title>
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background-color: #f4f7f6;
+            color: #333;
+            text-align: center;
+            padding: 50px 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        h1 { color: #2c3e50; font-size: 24px; }
+        p { line-height: 1.6; color: #666; }
+        .btn {
+            display: inline-block;
+            background-color: #3498db;
+            color: white;
+            padding: 15px 30px;
+            text-decoration: none;
+            border-radius: 30px;
+            font-weight: bold;
+            margin-top: 20px;
+            cursor: pointer;
+            border: none;
+            transition: background 0.3s;
+        }
+        .btn:hover { background-color: #2980b9; }
+        .alert-text {
+            color: #e74c3c;
+            font-weight: bold;
+            margin-top: 15px;
+            font-size: 0.95em;
+        }
+        .steps {
+            text-align: left;
+            margin-top: 30px;
+            background: #f9f9f9;
+            padding: 20px;
+            border-radius: 10px;
+        }
+        .guide-image {
+            max-width: 100%;
+            height: auto;
+            margin: 15px 0;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h1>シージの「スキン勝手に外れる問題」対策ツール</h1>
+    <p>このツールは、Ubisoftのサーバーが勝手に服装をリセットするのを防ぎ、<br>
+        お気に入りの設定をワンクリックで復元します。</p>
+
+    <button class="btn" onclick="downloadBatch()">ツールをダウンロードする</button>
+
+    <p class="alert-text">※必ず「デスクトップ」を保存先に選んでダウンロードしてください！</p>
+
+    <div class="steps">
+        <h3>使いかた（簡単４ステップ）</h3>
+        <ol>
+            <li>ダウンロードしたファイルをデスクトップファイルに保存</li>
+            <li>シージでスキンを着せてからシージを閉じます</li>
+            <li> デスクトップにあるツールを開いて <strong>「2」</strong> を押す</li>
+            <li>シージ起動前に、ツールを開いて <strong>「1」</strong> を押す</li>
+        </ol>
+        <p><small>※実行時に青い画面が出たら「詳細情報」→「実行」を押してください。</small></p>
+    </div>
+</div>
+
+<script>
+function downloadBatch() {
+    const batchCode = `@echo off
+setlocal enabledelayedexpansion
+set "UBI_PATH=C:\\Program Files (x86)\\Ubisoft\\Ubisoft Game Launcher\\savegames"
+set "GAME_ID=1843"
+for /f "tokens=*" %%a in ('dir /b /ad "%UBI_PATH%"') do ( set "USER_ID=%%a" )
+set "BACKUP_DIR=%USER_PROFILE%\\Desktop\\Siege_Backup_1843"
+set "SAVE_DIR=%UBI_PATH%\\!USER_ID!\\%GAME_ID%"
+
+:MENU
+cls
+echo ============================================
+echo   R6S Skin Management Tool
+echo ============================================
+echo   User ID: !USER_ID!
+echo ============================================
+echo 1. [RESTORE] Restore skins and Lock
+echo 2. [SAVE] Save current skins (Backup)
+echo 3. [UNLOCK] Unlock for settings change
+echo 4. EXIT
+echo ============================================
+set /p CHOICE="Enter number (1-4): "
+
+if "%CHOICE%"=="1" goto RESTORE
+if "%CHOICE%"=="2" goto BACKUP
+if "%CHOICE%"=="3" goto UNLOCK
+if "%CHOICE%"=="4" exit
+goto MENU
+
+:RESTORE
+if not exist "%BACKUP_DIR%" ( echo [Error] No backup data found. Please run "2" first. & pause & goto MENU )
+attrib -r "%SAVE_DIR%\\*.save" >nul 2>&1
+xcopy "%BACKUP_DIR%" "%SAVE_DIR%" /E /I /Y
+attrib +r "%SAVE_DIR%\\*.save" >nul 2>&1
+echo Done! Please start R6S.
+pause
+goto MENU
+
+:BACKUP
+xcopy "%SAVE_DIR%" "%BACKUP_DIR%" /E /I /Y
+echo Backup complete.
+pause
+goto MENU
+
+:UNLOCK
+attrib -r "%SAVE_DIR%\\*.save" >nul 2>&1
+echo Unlock complete.
+pause
+goto MENU`;
+
+    const blob = new Blob([batchCode], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'R6S_Skin_Fix.bat';
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+}
+</script>
+
+</body>
+</html>
